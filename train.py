@@ -149,8 +149,10 @@ if __name__ == "__main__":
 
     end = time.time()
     mean_tst_acc /= args.epochs
-    print('Training Time: ', end-start, '(s)')
     print('Using KAN: ', args.use_kan)
     print('Max Test Accuracy: ', max_tst_acc)
     print('Mean Test Accuracy: ', mean_tst_acc)
+    print('Training Time (during 2000epochs): ', end-start, '(s)')
+    print('# of model parameters: ', sum(p.numel() for p in model.parameters() if p.requires_grad))
+    
     
