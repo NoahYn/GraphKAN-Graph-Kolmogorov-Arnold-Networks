@@ -12,6 +12,7 @@ import numpy as np
 from torch_geometric.datasets import Planetoid, WebKB
 import torch_geometric.transforms as T
 from torch_geometric.utils import *
+import time
 
 class KanGNN(torch.nn.Module):
     def __init__(self, in_feat, hidden_feat, out_feat, grid_feat, num_layers, use_kan=1, use_bias=False):
@@ -132,6 +133,7 @@ if __name__ == "__main__":
     trn_mask, val_mask, tst_mask = random_disassortative_splits(label, out_feat)
     trn_mask, val_mask, tst_mask = trn_mask.to(args.device), val_mask.to(args.device), tst_mask.to(args.device)
     
+    start = time.time()
     max_tst_acc = 0
     for epoch in range(args.epochs):
         trn_acc, trn_loss = train(args, feat, adj, label, trn_mask, model, optimizer)
@@ -143,9 +145,8 @@ if __name__ == "__main__":
         if epoch % 10 == 0:
             print(f'Epoch: {epoch:04d}, Trn_loss: {trn_loss:.4f}, Trn_acc: {trn_acc:.4f}, Val_acc: {val_acc:.4f}, Test_acc: {tst_acc:.4f}')
 
+    end = time.time()
+    print('Training Time: ', end-start, '(s)')
     print('Using KAN: ', args.use_kan)
     print('Max Test Accuracy: ', max_tst_acc)
     
-
-
-
