@@ -135,6 +135,7 @@ if __name__ == "__main__":
     
     start = time.time()
     max_tst_acc = 0
+    mean_tst_acc = 0
     for epoch in range(args.epochs):
         trn_acc, trn_loss = train(args, feat, adj, label, trn_mask, model, optimizer)
         pred = eval(args, feat, adj, model)
@@ -142,11 +143,14 @@ if __name__ == "__main__":
         tst_acc = int((pred[tst_mask] == label[tst_mask]).sum()) / int(tst_mask.sum())
         
         max_tst_acc = max(max_tst_acc, tst_acc)
+        mean_tst_acc += tst_acc
         if epoch % 10 == 0:
             print(f'Epoch: {epoch:04d}, Trn_loss: {trn_loss:.4f}, Trn_acc: {trn_acc:.4f}, Val_acc: {val_acc:.4f}, Test_acc: {tst_acc:.4f}')
 
     end = time.time()
+    mean_tst_acc /= args.epochs
     print('Training Time: ', end-start, '(s)')
     print('Using KAN: ', args.use_kan)
     print('Max Test Accuracy: ', max_tst_acc)
+    print('Mean Test Accuracy: ', mean_tst_acc)
     
