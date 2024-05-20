@@ -83,7 +83,7 @@ if __name__ == "__main__":
     parser.add_argument('--grid_size', type=int, default=200)
     parser.add_argument('--n_layers', type=int, default=2)
     # training
-    parser.add_argument('--epochs', type=int, default=1000)
+    parser.add_argument('--epochs', type=int, default=300)
     parser.add_argument('--early_stopping', type=int, default=100)
     parser.add_argument('--seed', type=int, default=42)
     # optimizer
@@ -152,7 +152,10 @@ if __name__ == "__main__":
     print('Using KAN: ', args.use_kan)
     print('Max Test Accuracy: ', max_tst_acc)
     print('Mean Test Accuracy: ', mean_tst_acc)
-    print('Training Time (during 2000epochs): ', end-start, '(s)')
+    print(f'Training Time (during %d epochs): '%args.epochs, end-start, '(s)')
     print('# of model parameters: ', sum(p.numel() for p in model.parameters() if p.requires_grad))
     
     
+
+
+
