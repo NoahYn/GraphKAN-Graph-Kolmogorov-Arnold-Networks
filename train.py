@@ -131,14 +131,20 @@ if __name__ == "__main__":
 
     trn_mask, val_mask, tst_mask = random_disassortative_splits(label, out_feat)
     trn_mask, val_mask, tst_mask = trn_mask.to(args.device), val_mask.to(args.device), tst_mask.to(args.device)
+    
+    max_tst_acc = 0
     for epoch in range(args.epochs):
         trn_acc, trn_loss = train(args, feat, adj, label, trn_mask, model, optimizer)
         pred = eval(args, feat, adj, model)
         val_acc = int((pred[val_mask] == label[val_mask]).sum()) / int(val_mask.sum())
         tst_acc = int((pred[tst_mask] == label[tst_mask]).sum()) / int(tst_mask.sum())
+        
+        max_tst_acc = max(max_tst_acc, tst_acc)
+        if epoch % 10 == 0:
+            print(f'Epoch: {epoch:04d}, Trn_loss: {trn_loss:.4f}, Trn_acc: {trn_acc:.4f}, Val_acc: {val_acc:.4f}, Test_acc: {tst_acc:.4f}')
 
-        print(f'Epoch: {epoch:04d}, Trn_loss: {trn_loss:.4f}, Trn_acc: {trn_acc:.4f}, Val_acc: {val_acc:.4f}, Test_acc: {tst_acc:.4f}')
-
+    print('Using KAN: ', args.use_kan)
+    print('Max Test Accuracy: ', max_tst_acc)
     
 
 
