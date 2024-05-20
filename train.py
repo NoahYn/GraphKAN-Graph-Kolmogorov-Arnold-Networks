@@ -13,7 +13,7 @@ from torch_geometric.datasets import Planetoid, WebKB
 import torch_geometric.transforms as T
 from torch_geometric.utils import *
 
-class KanGNN(KAN):
+class KanGNN(torch.nn.Module):
     def __init__(self, in_feat, hidden_feat, out_feat, grid_feat, num_layers, use_kan=1, use_bias=False):
         super().__init__()
         self.num_layers = num_layers
