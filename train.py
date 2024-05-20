@@ -13,12 +13,8 @@ from torch_geometric.datasets import Planetoid, WebKB
 import torch_geometric.transforms as T
 from torch_geometric.utils import *
 
-import matplotlib.pyplot as plt
-import os
-from kan import *
-
 class KanGNN(KAN):
-    def __init__(self, in_feat, hidden_feat, out_feat, grid_feat, num_layers, use_kan=True, use_bias=False):
+    def __init__(self, in_feat, hidden_feat, out_feat, grid_feat, num_layers, use_kan=1, use_bias=False):
         super().__init__()
         self.num_layers = num_layers
         self.lin_in = nn.Linear(in_feat, hidden_feat, bias=use_bias)
@@ -61,6 +57,16 @@ def eval(args, feat, adj, model):
     pred = pred.argmax(dim=-1)
     return pred
 
+def str2bool(v) :
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 if __name__ == "__main__":  
     
     parser = argparse.ArgumentParser()
@@ -69,7 +75,8 @@ if __name__ == "__main__":
     parser.add_argument('--name', type=str, default='Cora')
     parser.add_argument('--logger_path', type=str, default='logger/esm')
     # model
-    parser.add_argument('--kan', type=bool, default='KAN')
+    parser.add_argument('--use_kan', type=str2bool, default=True)
+    parser.add_argument('--use_bias', type=str2bool, default=True)
     parser.add_argument('--dropout', type=float, default=0.)
     parser.add_argument('--hidden_size', type=int, default=256)
     parser.add_argument('--grid_size', type=int, default=200)
@@ -106,13 +113,13 @@ if __name__ == "__main__":
     out_feat = max(dataset.y) + 1
 
     model = KanGNN(
-                   use_kan = args.kan,
+                   use_kan = args.use_kan,
                    in_feat=in_feat,
                    hidden_feat=args.hidden_size, 
                    out_feat=out_feat, 
                    grid_feat=args.grid_size,
                    num_layers=args.n_layers,
-                   use_bias=False,
+                   use_bias=args.use_bias,
                   ).to(args.device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
