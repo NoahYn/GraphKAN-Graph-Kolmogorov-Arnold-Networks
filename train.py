@@ -13,24 +13,23 @@ from torch_geometric.datasets import Planetoid, WebKB
 import torch_geometric.transforms as T
 from torch_geometric.utils import *
 
-class KanGNN(torch.nn.Module):
-    def __init__(self, in_feat, hidden_feat, out_feat, grid_feat, num_layers, use_bias=False):
+import matplotlib.pyplot as plt
+import os
+from kan import *
+
+class KanGNN(KAN):
+    def __init__(self, in_feat, hidden_feat, out_feat, grid_feat, num_layers, use_kan=True, use_bias=False):
         super().__init__()
         self.num_layers = num_layers
         self.lin_in = nn.Linear(in_feat, hidden_feat, bias=use_bias)
         #self.lin_in = KANLayer(in_feat, hidden_feat, grid_feat, addbias=use_bias)
         self.lins = torch.nn.ModuleList()
         for i in range(num_layers):
-            self.lins.append(KANLayer(hidden_feat, hidden_feat, grid_feat, addbias=use_bias))
+            if use_kan is True :
+                self.lins.append(KANLayer(hidden_feat, hidden_feat, grid_feat, addbias=use_bias))
+            else : # MLP
+                self.lins.append(nn.Linear(hidden_feat, hidden_feat, bias=use_bias))
         self.lins.append(nn.Linear(hidden_feat, out_feat, bias=False))
-        #self.lins.append(KANLayer(hidden_feat, out_feat, grid_feat, addbias=False))
-
-        # self.lins = torch.nn.ModuleList()
-        # self.lins.append(nn.Linear(in_feat, hidden_feat, bias=use_bias))
-        # for i in range(num_layers):
-        #     self.lins.append(nn.Linear(hidden_feat, hidden_feat, bias=use_bias))
-        # self.lins.append(nn.Linear(hidden_feat, out_feat, bias=use_bias))
-
     
     def forward(self, x, adj):
         x = self.lin_in(x)
@@ -62,13 +61,15 @@ def eval(args, feat, adj, model):
     pred = pred.argmax(dim=-1)
     return pred
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
+    
     parser = argparse.ArgumentParser()
     # data
     parser.add_argument('--path', type=str, default='./data/')
     parser.add_argument('--name', type=str, default='Cora')
     parser.add_argument('--logger_path', type=str, default='logger/esm')
     # model
+    parser.add_argument('--kan', type=bool, default='KAN')
     parser.add_argument('--dropout', type=float, default=0.)
     parser.add_argument('--hidden_size', type=int, default=256)
     parser.add_argument('--grid_size', type=int, default=200)
@@ -79,11 +80,11 @@ if __name__ == "__main__":
     parser.add_argument('--seed', type=int, default=42)
     # optimizer
     parser.add_argument('--lr', type=float, default=5e-4, help='Adam learning rate')
+
     args = parser.parse_args()
 
     args.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     #args.device = torch.device('cpu')
-
 
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -105,6 +106,7 @@ if __name__ == "__main__":
     out_feat = max(dataset.y) + 1
 
     model = KanGNN(
+                   use_kan = args.kan,
                    in_feat=in_feat,
                    hidden_feat=args.hidden_size, 
                    out_feat=out_feat, 
